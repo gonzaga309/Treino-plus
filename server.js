@@ -2,28 +2,31 @@ require("dotenv").config();
 const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
-const Database = require("better-sqlite3");
+const { createClient } = require("@supabase/supabase-js");
 const { MercadoPagoConfig, Payment } = require("mercadopago");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const BASE_URL = (process.env.BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, "");
 const TOKEN = process.env.MERCADO_PAGO_ACCESS_TOKEN;
-const db = new Database("treino-plus.sqlite");
-db.pragma("journal_mode = WAL");
-db.exec(`
-  CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    email TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',
-    payment_id TEXT,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-  );
-`);
-const saveOrder = db.prepare("INSERT INTO orders (id,email,status) VALUES (?,?, 'pending')");
-const getOrder = db.prepare("SELECT id,email,status FROM orders WHERE id=?");
-const updateOrder = db.prepare("UPDATE orders SET status=?, payment_id=? WHERE id=?");
-const findByPayment = db.prepare("SELECT id FROM orders WHERE id=?");
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SECRET
+);
+
+
+  
+    
+    
+    
+    
+    
+  
+
+
+
+
+
 
 app.use(express.json());
 app.use(express.static(__dirname));
@@ -38,7 +41,15 @@ app.post("/api/create-pix", async (req, res) => {
     const email = String(req.body.email || "").trim().toLowerCase();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: "Informe um e-mail válido." });
     const orderId = crypto.randomUUID();
-    saveOrder.run(orderId, email);
+    const { error } = await supabase
+  .from("pedidos")
+  .insert({
+    id: orderId,
+    email: email,
+    status: "pending"
+  });
+
+if (error) throw error;
     const payment = await paymentClient().create({
       body: {
         transaction_amount: 40,
@@ -50,7 +61,15 @@ app.post("/api/create-pix", async (req, res) => {
         metadata: { order_id: orderId, product: "treino-plus-premium" }
       }
     });
-    updateOrder.run("pending", String(payment.id), orderId);
+    const { error: updateError } = await supabase
+  .from("pedidos")
+  .update({
+    status: "pending",
+    payment_id: String(payment.id)
+  })
+  .eq("id", orderId);
+
+if (updateError) throw updateError;
     const tx = payment.point_of_interaction?.transaction_data || {};
     res.json({
       orderId,
@@ -66,27 +85,73 @@ app.post("/api/create-pix", async (req, res) => {
   }
 });
 
+
 async function refreshPayment(paymentId, expectedOrderId) {
-  const payment = await paymentClient().get({ id: paymentId });
+  const payment = await paymentClient().get({
+    id: paymentId
+  });
+
   const orderId = String(payment.external_reference || "");
-  if (!orderId || (expectedOrderId && orderId !== expectedOrderId)) return null;
-  const order = getOrder.get(orderId);
-  if (!order || String(payment.transaction_amount) !== "40" || payment.payment_method_id !== "pix") return null;
-  // Nunca liberar acesso por redirect do navegador: somente status confirmado consultado na API.
-  if (payment.status === "approved") updateOrder.run("approved", String(payment.id), orderId);
-  else if (["rejected", "cancelled", "refunded", "charged_back"].includes(payment.status)) {
-    updateOrder.run(payment.status, String(payment.id), orderId);
+
+  if (!orderId || (expectedOrderId && orderId !== expectedOrderId)) {
+    throw new Error("Pedido inválido");
   }
-  return getOrder.get(orderId);
+
+  const { data: order, error } = await supabase
+    .from("pedidos")
+    .select("*")
+    .eq("id", orderId)
+    .single();
+
+  if (error || !order) {
+    throw new Error("Pedido não encontrado");
+  }
+
+  if (
+    String(payment.transaction_amount) !== "40" ||
+    String(order.payment_id) !== String(payment.id) ||
+    payment.payment_method_id !== "pix"
+  ) {
+    throw new Error("Pagamento inválido");
+  }
+
+  let status = payment.status;
+
+  if (!["approved", "pending", "in_process", "rejected", "cancelled", "refunded", "charged_back"].includes(status)) {
+    status = "pending";
+  }
+
+  const { data: updated, error: updateError } = await supabase
+    .from("pedidos")
+    .update({ status })
+    .eq("id", orderId)
+    .select("*")
+    .single();
+
+  if (updateError) throw updateError;
+
+  return updated;
 }
 
 app.get("/api/order/:id", async (req, res) => {
   try {
     const orderId = String(req.params.id || "");
-    const order = getOrder.get(orderId);
+    const { data: order, error } = await supabase
+  .from("pedidos")
+  .select("*")
+  .eq("id", orderId)
+  .maybeSingle();
+
+if (error) throw error;
     if (!order) return res.status(404).json({ error: "Pedido não encontrado." });
     if (order.payment_id) await refreshPayment(order.payment_id, orderId);
-    const fresh = getOrder.get(orderId);
+    const { data: fresh, error: freshError } = await supabase
+  .from("pedidos")
+  .select("*")
+  .eq("id", orderId)
+  .single();
+
+if (freshError) throw freshError;
     res.json({ orderId: fresh.id, status: fresh.status, premium: fresh.status === "approved" });
   } catch (e) {
     console.error("order status:", e.message);
@@ -103,15 +168,25 @@ app.post("/webhooks/mercadopago", async (req, res) => {
     if (paymentId && (!type || type === "payment")) {
       const payment = await paymentClient().get({ id: String(paymentId) });
       const orderId = String(payment.external_reference || "");
-      if (orderId && findByPayment.get(orderId)) await refreshPayment(String(paymentId), orderId);
+      if (orderId) {
+  await refreshPayment(String(payment.id), orderId);
+      }
     }
   } catch (e) {
     console.error("webhook verification:", e.message);
   }
 });
 
-app.get("/api/premium/:orderId", (req, res) => {
-  const order = getOrder.get(String(req.params.orderId || ""));
+app.get("/api/premium/:orderId", async (req, res) => {
+  const { data: order, error } = await supabase
+  .from("pedidos")
+  .select("*")
+  .eq("id", String(req.params.orderId))
+  .maybeSingle();
+
+if (error) {
+  return res.status(500).json({ error: "Erro ao verificar pagamento" });
+}
   if (!order || order.status !== "approved") return res.status(403).json({ error: "Acesso premium bloqueado até a confirmação do Pix." });
   res.json({
     title: "Área Premium Treino+",
