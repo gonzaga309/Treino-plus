@@ -1,14 +1,18 @@
 {
-  "name": "treino-plus",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Treino+ - site de treinos e receitas com acesso premium após confirmação Pix",
-  "scripts": {"start": "node server.js"},
-  "engines": {"node": ">=20"},
-  "dependencies": {
-    "better-sqlite3": "^11.8.1",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "mercadopago": "^2.2.0"
-  }
+"name": "treino-plus",
+"version": "1.0.0",
+"description": "Treino+ - treinos e receitas",
+"main": "servidor.js",
+"scripts": {
+"start": "node servidor.js"
+},
+"engines": {
+"node": ">=20"
+},
+"dependencies": {
+"better-sqlite3": "^11.8.1",
+"dotenv": "^16.4.7",
+"express": "^4.21.2",
+"mercadopago": "^2.2.0"
+}
 }
