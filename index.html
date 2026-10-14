@@ -29,7 +29,16 @@ const SUPABASE_URL = "https://lvcrdxkqpilxsktztezcn.supabase.co";
 <div class="card"><div class="emoji">🥗</div><h3>Receitas práticas</h3><p class="muted">Ideias simples para café da manhã, almoço, jantar e lanches.</p></div>
 <div class="card"><div class="emoji">📈</div><h3>Constância primeiro</h3><p class="muted">Use o conteúdo como apoio e adapte o ritmo às suas necessidades.</p></div>
 </section>
-<section id="comprar" class="panel">
+<section id="login" class="panel">
+  <h2>🔐 Entrar no Treino+</h2>
+  <p>Entre na sua conta para acessar seus treinos e receitas.</p>
+  <input id="loginEmail" type="email" placeholder="Seu e-mail">
+  <input id="loginSenha" type="password" placeholder="Sua senha">
+  <button type="button" id="btnEntrar">Entrar</button>
+  <button type="button" id="btnCadastrar">Criar conta</button>
+  <p id="loginMensagem"></p>
+</section>
+ <section id="comprar" class="panel">
 <div class="tag">Acesso premium</div><h2>Desbloqueie o Treino+</h2>
 <div class="price">R$ 40,00 <small>pagamento único</small></div>
 <p class="muted">Inclui os treinos e receitas da área premium. O acesso é liberado apenas depois que o pagamento for confirmado pelo provedor.</p>
@@ -66,5 +75,39 @@ $("copyBtn").addEventListener("click",async()=>{try{await navigator.clipboard.wr
 $("checkBtn").addEventListener("click",checkStatus);
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>renderTab(b.dataset.tab)));
 (async()=>{const saved=localStorage.getItem("treinoPlusOrder");if(saved){currentOrder=saved;try{const r=await fetch("/api/order/"+encodeURIComponent(saved));const d=await r.json();if(d.premium)await loadPremium()}catch(e){}}})();
+document.getElementById("btnCadastrar").onclick = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginSenha").value;
+  const msg = document.getElementById("loginMensagem");
+
+  if (!email || !password) {
+    msg.textContent = "Preencha o e-mail e a senha.";
+    return;
+  }
+
+  const { error } = await supabaseClient.auth.signUp({
+    email,
+    password
+  });
+
+  msg.textContent = error
+    ? error.message
+    : "Cadastro solicitado! Verifique seu e-mail para confirmar a conta.";
+};
+
+document.getElementById("btnEntrar").onclick = async () => {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginSenha").value;
+  const msg = document.getElementById("loginMensagem");
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  msg.textContent = error
+    ? error.message
+    : "Login realizado com sucesso!";
+};
 </script>
 </body></html>
