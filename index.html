@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0a0d">
+<title>Treino+ | Treino e receitas</title>
+<style>
+:root{--bg:#09090c;--panel:#15151b;--red:#ff2638;--muted:#a7a7b3;--line:#2b2b35}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}header{padding:20px max(20px,calc((100% - 1050px)/2));border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#09090cf2;backdrop-filter:blur(12px);z-index:5}.logo{font-weight:900;font-size:25px;letter-spacing:-1px}.logo span{color:var(--red)}main{max-width:1050px;margin:auto;padding:26px 18px 60px}.hero{border:1px solid var(--line);border-radius:24px;padding:clamp(24px,5vw,54px);background:radial-gradient(ellipse at 90% 0%,#5e101b 0,transparent 40%),linear-gradient(140deg,#191920,#0d0d11)}.tag{color:#ff7d89;font-weight:800;text-transform:uppercase;font-size:12px;letter-spacing:1.8px}.hero h1{font-size:clamp(36px,7vw,62px);line-height:1.02;letter-spacing:-2px;margin:14px 0}.hero p{max-width:620px;color:#c6c6d0}.btn{border:0;border-radius:12px;background:var(--red);color:white;font-weight:850;padding:14px 19px;cursor:pointer;font-size:15px}.btn:disabled{opacity:.5;cursor:wait}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:20px 0}.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px}.emoji{font-size:28px}.muted{color:var(--muted)}h2{letter-spacing:-.5px}.price{font-size:38px;font-weight:900}.price small{font-size:14px;color:var(--muted);font-weight:500}.formrow{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}.field{width:100%;background:#09090c;border:1px solid #393944;border-radius:10px;padding:13px;color:white;font-size:16px}.formrow .field{flex:1;min-width:210px}.notice{padding:12px 14px;background:#241d0b;border:1px solid #5d4a19;border-radius:10px;color:#ffe6a1;margin:14px 0}.success{background:#10291b;border-color:#245e3a;color:#b7ffd0}.error{background:#35151a;border-color:#72212c;color:#ffd1d5}.hidden{display:none!important}.qr{display:block;max-width:220px;width:100%;margin:12px auto;background:white;padding:8px;border-radius:10px}.copy{width:100%;background:#09090c;color:white;border:1px solid #444452;padding:12px;border-radius:10px;word-break:break-all}.tabs{display:flex;gap:8px;flex-wrap:wrap}.tabs button{background:#202028;color:white;border:1px solid #3b3b46;border-radius:999px;padding:10px 15px}.tabs button.active{background:var(--red);border-color:var(--red)}.item{margin:12px 0;padding:17px;background:#101015;border:1px solid var(--line);border-radius:14px}.item h3{margin:0 0 8px}.small{font-size:13px;color:var(--muted)}footer{text-align:center;padding:24px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header><div class="logo">TREINO<span>+</span></div><div class="muted">Seu próximo passo começa aqui</div></header>
+<main>
+<section class="hero">
+<div class="tag">Treino • alimentação • constância</div>
+<h1>Mais força.<br><span style="color:var(--red)">Mais você.</span></h1>
+<p>Organize seus treinos e descubra receitas práticas para apoiar sua rotina. Desbloqueie a área premium por pagamento único de R$ 40,00 via Pix.</p>
+<button class="btn" onclick="document.querySelector('#comprar').scrollIntoView({behavior:'smooth'})">DESBLOQUEAR POR R$ 40</button>
+</section>
+<section class="grid">
+<div class="card"><div class="emoji">🏋️</div><h3>Planos de treino</h3><p class="muted">Rotinas organizadas por grupos musculares e orientações de execução.</p></div>
+<div class="card"><div class="emoji">🥗</div><h3>Receitas práticas</h3><p class="muted">Ideias simples para café da manhã, almoço, jantar e lanches.</p></div>
+<div class="card"><div class="emoji">📈</div><h3>Constância primeiro</h3><p class="muted">Use o conteúdo como apoio e adapte o ritmo às suas necessidades.</p></div>
+</section>
+<section id="comprar" class="panel">
+<div class="tag">Acesso premium</div><h2>Desbloqueie o Treino+</h2>
+<div class="price">R$ 40,00 <small>pagamento único</small></div>
+<p class="muted">Inclui os treinos e receitas da área premium. O acesso é liberado apenas depois que o pagamento for confirmado pelo provedor.</p>
+<form id="buyForm"><div class="formrow"><input class="field" id="email" type="email" required placeholder="Seu e-mail para identificar o pedido"><button class="btn" id="payBtn">GERAR PIX</button></div></form>
+<div id="message" class="notice hidden" role="status"></div>
+<div id="paymentBox" class="hidden">
+<h3>Finalize o pagamento Pix</h3><p class="muted">Escaneie o QR Code no aplicativo do seu banco ou copie o código abaixo.</p>
+<img id="qr" class="qr hidden" alt="QR Code Pix">
+<textarea id="pixCode" class="copy" rows="4" readonly></textarea>
+<div class="formrow"><button class="btn" type="button" id="copyBtn">COPIAR CÓDIGO PIX</button><button class="btn" type="button" id="checkBtn" style="background:#33333d">JÁ PAGUEI — VERIFICAR</button></div>
+<a id="ticket" class="muted" target="_blank" rel="noopener">Abrir página de pagamento</a>
+<p id="statusText" class="small">Aguardando confirmação segura do pagamento…</p>
+</div>
+</section>
+<section id="premium" class="panel hidden" style="margin-top:20px">
+<div class="tag">Pagamento confirmado</div><h2>Bem-vindo à área premium! 🔓</h2>
+<p class="muted">Seu acesso está liberado neste dispositivo. Guarde o identificador deste pedido para consultar seu acesso novamente.</p>
+<div class="tabs"><button class="active" data-tab="workouts">🏋️ Exercícios</button><button data-tab="recipes">🥗 Receitas</button></div>
+<div id="premiumContent"></div>
+</section>
+<p class="small">Aviso: os treinos e receitas são informativos e não substituem orientação de profissional de educação física ou nutricionista. Adapte os exercícios ao seu nível e às suas condições individuais.</p>
+</main>
+<footer>© Treino+ • Feito para apoiar sua rotina, um dia de cada vez.</footer>
+<script>
+const $=id=>document.getElementById(id);let currentOrder=null,pollTimer=null,premiumData=null;
+function showMessage(text,kind=""){const el=$("message");el.textContent=text;el.className="notice "+kind}
+async function createPix(e){e.preventDefault();$("payBtn").disabled=true;showMessage("Gerando seu Pix…");try{const r=await fetch("/api/create-pix",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:$("email").value})});const d=await r.json();if(!r.ok)throw Error(d.error||"Não foi possível gerar o Pix.");currentOrder=d.orderId;localStorage.setItem("treinoPlusOrder",currentOrder);$("paymentBox").classList.remove("hidden");$("pixCode").value=d.pixCopyPaste||"";if(d.qrCodeBase64){$("qr").src="data:image/png;base64,"+d.qrCodeBase64;$("qr").classList.remove("hidden")}else $("qr").classList.add("hidden");$("ticket").href=d.ticketUrl||"#";$("ticket").classList.toggle("hidden",!d.ticketUrl);showMessage("Pix gerado. O acesso será liberado somente após a confirmação do pagamento.");startPolling();}catch(err){showMessage(err.message,"error")}finally{$("payBtn").disabled=false}}
+async function checkStatus(){if(!currentOrder)return;try{const r=await fetch("/api/order/"+encodeURIComponent(currentOrder));const d=await r.json();if(!r.ok)throw Error(d.error||"Não foi possível verificar.");if(d.premium){clearInterval(pollTimer);showMessage("Pagamento confirmado! Seu acesso premium está liberado.","success");await loadPremium();}else{$("statusText").textContent="Status do pagamento: "+d.status+". Aguardando confirmação…"}}catch(err){$("statusText").textContent=err.message}}
+function startPolling(){clearInterval(pollTimer);checkStatus();pollTimer=setInterval(checkStatus,5000)}
+async function loadPremium(){const r=await fetch("/api/premium/"+encodeURIComponent(currentOrder));const d=await r.json();if(!r.ok)throw Error(d.error||"Acesso não liberado.");premiumData=d;$("premium").classList.remove("hidden");renderTab("workouts");$("premium").scrollIntoView({behavior:"smooth"})}
+function renderTab(tab){document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));const items=tab==="workouts"?premiumData.workouts:premiumData.recipes;$("premiumContent").innerHTML=items.map(x=>tab==="workouts"?`<article class="item"><h3>${x.name}</h3><p class="muted">${x.level}</p><p><b>${x.sets}</b><br>Descanso: ${x.rest}</p><p>${x.note}</p></article>`:`<article class="item"><h3>${x.name}</h3><p class="small">⏱ ${x.time}</p><b>Ingredientes</b><ul>${x.ingredients.map(i=>`<li>${i}</li>`).join("")}</ul><b>Modo de preparo</b><p>${x.method}</p></article>`).join("")}
+$("buyForm").addEventListener("submit",createPix);
+$("copyBtn").addEventListener("click",async()=>{try{await navigator.clipboard.writeText($("pixCode").value);showMessage("Código Pix copiado!","success")}catch(e){$("pixCode").select();showMessage("Selecione e copie o código Pix manualmente.")}});
+$("checkBtn").addEventListener("click",checkStatus);
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>renderTab(b.dataset.tab)));
+(async()=>{const saved=localStorage.getItem("treinoPlusOrder");if(saved){currentOrder=saved;try{const r=await fetch("/api/order/"+encodeURIComponent(saved));const d=await r.json();if(d.premium)await loadPremium()}catch(e){}}})();
+</script>
+</body></html>
