@@ -3,9 +3,9 @@
   "name": "treino-plus",
   "version": "1.0.0",
   "description": "Treino+ - treinos e receitas",
-  "main": "servidor.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node servidor.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=20"
