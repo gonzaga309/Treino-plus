@@ -26,7 +26,7 @@ const updateOrder = db.prepare("UPDATE orders SET status=?, payment_id=? WHERE i
 const findByPayment = db.prepare("SELECT id FROM orders WHERE id=?");
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(__dirname));
 
 function paymentClient() {
   if (!TOKEN || TOKEN.includes("COLE_SEU")) throw new Error("Configure MERCADO_PAGO_ACCESS_TOKEN no .env");
